@@ -5,15 +5,14 @@
         "hbshim"
     ],
     "url": "https://github.com/hbshim/mediawiki-mathjax",
-    "descriptionmsg": "Enables MathJax (http://www.mathjax.org/) for typesetting TeX and LaTeX formulae in MediaWiki",
+    "description": "Enables MathJax (http://www.mathjax.org/) for typesetting TeX and LaTeX formulae in MediaWiki",
     "license-name": "GPL v3",
     "AutoloadClasses": {
         "MathJax_Parser": "MathJax.php"
     },
 	"Hooks": {
-		"ParserFirstCallInit": [
-			"MathJax_Parser::RunMathJax"
-		]
+		"ParserFirstCallInit": ["MathJax_Parser::RunMathJax"],
+        "BeforePageDisplay": ["MathJax_Parser::Inject_JS"]
 	},
     "type": "Tag extensions",
 	"manifest_version": 1
