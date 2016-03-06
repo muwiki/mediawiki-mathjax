@@ -11,7 +11,7 @@
         "MathJax_Parser": "MathJax.php"
     },
 	"Hooks": {
-		"ParserFirstCallInit": ["MathJax_Parser::RunMathJax"],
+		"ParserFirstCallInit": ["MathJax_Parser::parserInit"],
         "BeforePageDisplay": ["MathJax_Parser::Inject_JS"]
 	},
     "type": "Tag extensions",
