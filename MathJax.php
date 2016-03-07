@@ -118,11 +118,11 @@ class MathJax_Parser
         $dom->recover = true;
 
         $previousInternalErrors = libxml_use_internal_errors(true);
-        $oreviousEntityLoader = libxml_disable_entity_loader();
+        $previousEntityLoader = libxml_disable_entity_loader();
         MediaWiki\suppressWarnings();
         $result = $dom->loadHTML(self::prepareHtmlDocument($script));
         MediaWiki\restoreWarnings();
-        libxml_disable_entity_loader($oreviousEntityLoader);
+        libxml_disable_entity_loader($previousEntityLoader);
         $htmlErrors = libxml_get_errors();
         libxml_use_internal_errors($previousInternalErrors);
 
