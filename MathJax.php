@@ -111,7 +111,7 @@ class MathJax_Parser
             return true;
         }
 
-        $dom = new DOMDocument('1.0', 'utf-8');
+        $dom = new DOMDocument();
         $dom->preserveWhiteSpace = true;
         $dom->resolveExternals = false;
         $dom->strictErrorChecking = false;
