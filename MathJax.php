@@ -117,6 +117,7 @@ class MathJax_Parser
         $dom->strictErrorChecking = false;
         $dom->recover = true;
 
+        libxml_clear_errors();
         $previousInternalErrors = libxml_use_internal_errors(true);
         $previousEntityLoader = libxml_disable_entity_loader();
         MediaWiki\suppressWarnings();
@@ -125,6 +126,7 @@ class MathJax_Parser
         libxml_disable_entity_loader($previousEntityLoader);
         $htmlErrors = libxml_get_errors();
         libxml_use_internal_errors($previousInternalErrors);
+        libxml_clear_errors();
 
         if (!$result || $htmlErrors) {
             return true;
