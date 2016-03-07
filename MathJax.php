@@ -111,7 +111,7 @@ class MathJax_Parser
             return true;
         }
 
-        $dom = new DOMDocument();
+        $dom = new DOMDocument('1.0', 'utf-8');
         $dom->preserveWhiteSpace = true;
         $dom->resolveExternals = false;
         $dom->strictErrorChecking = false;
@@ -119,7 +119,7 @@ class MathJax_Parser
         libxml_use_internal_errors();
 
         MediaWiki\suppressWarnings();
-        $result = $dom->loadHTML('<!doctype html><html><head></head><body>' . $script . '</body></html>');
+        $result = $dom->loadHTML(self::prepareHtmlDocument($script));
         MediaWiki\restoreWarnings();
 
         if (!$result) {
@@ -137,6 +137,14 @@ class MathJax_Parser
         }
 
         return false;
+    }
+
+    private static function prepareHtmlDocument($script)
+    {
+        return '<!doctype html><html>'
+            . '<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>'
+            . '<body>' . $script . '</body>'
+            . '</html>';
     }
 
 }
