@@ -78,7 +78,7 @@ class MathJax_Parser
 
 
 
-    public function afterTidy(Parser $parser, &$text)
+    public static function afterTidy(Parser $parser, &$text)
     {
         $text = NStrings::replace($text, '~' . preg_quote(Parser::MARKER_PREFIX) . 'mathjax\\-(?P<id>\\d+)' . preg_quote(Parser::MARKER_PREFIX) . '~', function (array $match) {
             return self::$makers[$match['id']];
