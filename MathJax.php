@@ -55,6 +55,10 @@ class MathJax_Parser
             $script->attrs['type'] .= '; mode=display';
         }
 
+        if (self::containsXss($script)) {
+            return '<span style="color:red">Invalid latex syntax</span>';
+        }
+
         self::$makers[++self::$markersCounter] = (string) $script;
 
         return [
@@ -97,6 +101,42 @@ class MathJax_Parser
         $out->addScript(Html::linkedScript($url));
 
         return true;
+    }
+
+
+
+    private static function containsXss(NHtml $script)
+    {
+        if (!NStrings::checkEncoding($script->getHtml())) {
+            return true;
+        }
+
+        $dom = new DOMDocument();
+        $dom->preserveWhiteSpace = true;
+        $dom->resolveExternals = false;
+        $dom->strictErrorChecking = false;
+        $dom->recover = true;
+        libxml_use_internal_errors();
+
+        MediaWiki\suppressWarnings();
+        $result = $dom->loadHTML('<!doctype html><html><head></head><body>' . $script . '</body></html>');
+        MediaWiki\restoreWarnings();
+
+        if (!$result) {
+            return true;
+        }
+
+        $scripts = $dom->getElementsByTagName('script');
+        if ($scripts->length > 1) {
+            return true;
+        }
+
+        $filteredContent = $scripts->item(0)->textContent;
+        if ($script->getHtml() !== $filteredContent) {
+            return true;
+        }
+
+        return false;
     }
 
 }
