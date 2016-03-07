@@ -116,13 +116,17 @@ class MathJax_Parser
         $dom->resolveExternals = false;
         $dom->strictErrorChecking = false;
         $dom->recover = true;
-        libxml_use_internal_errors();
 
+        $previousInternalErrors = libxml_use_internal_errors(true);
+        $oreviousEntityLoader = libxml_disable_entity_loader();
         MediaWiki\suppressWarnings();
         $result = $dom->loadHTML(self::prepareHtmlDocument($script));
         MediaWiki\restoreWarnings();
+        libxml_disable_entity_loader($oreviousEntityLoader);
+        $htmlErrors = libxml_get_errors();
+        libxml_use_internal_errors($previousInternalErrors);
 
-        if (!$result) {
+        if (!$result || $htmlErrors) {
             return true;
         }
 
