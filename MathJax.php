@@ -51,12 +51,19 @@ class MathJax_Parser
     {
         $script = NHtml::el('script', ['type' => 'math/tex'])
             ->setHtml($content);
+        $wrapper = 'span';
         if (!empty($attrs['display']) && $attrs['display'] === 'block') {
             $script->attrs['type'] .= '; mode=display';
+            $wrapper = 'div';
         }
 
         if (self::containsXss($script)) {
             return '<span style="color:red">Invalid latex syntax</span>';
+        }
+
+        if (!empty($attrs['id'])) {
+            $script = NHtml::el($wrapper, ['id' => 'equation-' . $attrs['id'], 'class' => 'math-equation'])
+                ->add($script);
         }
 
         self::$makers[++self::$markersCounter] = (string) $script;
