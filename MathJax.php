@@ -40,7 +40,7 @@ class MathJax_Parser
 
     public static function markBlockMathTags(Parser $parser, &$text)
     {
-        $text = NStrings::replace($text, '~:\\<math\\>~', '<math display="block">');
+        $text = NStrings::replace($text, '~:\\<math([^\\>]*)\\>~', '<math display="block"$1>');
 
         return true;
     }
