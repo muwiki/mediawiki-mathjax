@@ -49,8 +49,11 @@ class MathJax_Parser
 
     public static function mathTag($content, array $attrs, Parser $parser, PPFrame $frame)
     {
+        $math = self::preProcessLinks($content, $parser, $frame);
+
         $script = NHtml::el('script', ['type' => 'math/tex'])
-            ->setHtml($content);
+            ->setHtml($math);
+
         $wrapper = 'span';
         if (!empty($attrs['display']) && $attrs['display'] === 'block') {
             $script->attrs['type'] .= '; mode=display';
@@ -110,6 +113,26 @@ class MathJax_Parser
         return true;
     }
 
+    /**
+     * @param string $content
+     * @param \Parser $parser
+     * @param \PPFrame $frame
+     * @return string
+     */
+    public static function preProcessLinks($content, Parser $parser, PPFrame $frame)
+    {
+        return NStrings::replace($content, '~(?:(?<!\\\\)|^)\\\\(eq)?ref\\{(?P<link>[^\\}]+)\\}~', function (array $m) use ($parser) {
+            $html = $parser->recursiveTagParseFully(sprintf('{{canonicalurl:%s}}', ltrim($m['link'], ':')));
+            if (!$doc = self::createDomFromHtml($html)) {
+                return $m[0];
+            }
+            $links = (new DOMXpath($doc))->query('//a[@href]/@href');
+            return $links->length !== 1
+                ? $m[0]
+                : sprintf('\\href{%s}{\\text{#}}', $links->item(0)->value);
+        });
+    }
+
 
 
     private static function containsXss(NHtml $script)
@@ -118,22 +141,7 @@ class MathJax_Parser
             return true;
         }
 
-        $dom = new DOMDocument();
-        $dom->preserveWhiteSpace = true;
-        $dom->resolveExternals = false;
-        $dom->strictErrorChecking = false;
-        $dom->recover = true;
-
-        libxml_clear_errors();
-        $previousInternalErrors = libxml_use_internal_errors(true);
-        $previousEntityLoader = libxml_disable_entity_loader();
-        $result = $dom->loadHTML(self::prepareHtmlDocument($script));
-        libxml_disable_entity_loader($previousEntityLoader);
-        $htmlErrors = libxml_get_errors();
-        libxml_use_internal_errors($previousInternalErrors);
-        libxml_clear_errors();
-
-        if (!$result || $htmlErrors) {
+        if (!$dom = self::createDomFromHtml($script)) {
             return true;
         }
 
@@ -148,6 +156,30 @@ class MathJax_Parser
         }
 
         return false;
+    }
+
+    /**
+     * @param string $html
+     * @return \DOMDocument|null
+     */
+    private static function createDomFromHtml($html)
+    {
+        $dom = new DOMDocument();
+        $dom->preserveWhiteSpace = true;
+        $dom->resolveExternals = false;
+        $dom->strictErrorChecking = false;
+        $dom->recover = true;
+
+        libxml_clear_errors();
+        $previousInternalErrors = libxml_use_internal_errors(true);
+        $previousEntityLoader = libxml_disable_entity_loader();
+        $result = $dom->loadHTML(self::prepareHtmlDocument($html));
+        libxml_disable_entity_loader($previousEntityLoader);
+        $htmlErrors = libxml_get_errors();
+        libxml_use_internal_errors($previousInternalErrors);
+        libxml_clear_errors();
+
+        return $result && !$htmlErrors ? $dom : null;
     }
 
     private static function prepareHtmlDocument($script)
