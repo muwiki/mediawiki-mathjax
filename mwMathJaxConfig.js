@@ -160,6 +160,4 @@ MathJax.Hub.Config({
 		}
 	}
 });
-
-MathJax.Ajax.loadComplete("[MathJax]/extensions/MathJax/mwMathJaxConfig.js");
 //]]>

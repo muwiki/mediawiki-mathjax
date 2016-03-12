@@ -23,6 +23,8 @@ class MathJax_Parser
     private static $markersCounter = 0;
     private static $makers = [];
 
+    private static $jsInserted = false;
+
 
 
     public static function parserInit(Parser $parser)
@@ -103,12 +105,24 @@ class MathJax_Parser
     {
         global $wgMathJaxJS, $wgMathJaxProcConf, $wgMathJaxLocConf;
 
+        if (self::$jsInserted === true) {
+            return true;
+        }
+
+        $userConfig = ($wgMathJaxLocConf ?: self::$defaultCustomConfig);
+        $configContents = file_get_contents(__DIR__ . '/../../public' . $userConfig);
+        $out->addScript(\Html::rawElement(
+            'script',
+            ['type' => 'text/x-mathjax-config'],
+            "\n" . $configContents . "\n"
+        ));
+
         $file = $wgMathJaxJS ?: self::$defaultMathJaxPath;
         $config = ($wgMathJaxProcConf ?: self::$defaultMathJaxConfig);
-        $userConfig = ($wgMathJaxLocConf ?: self::$defaultCustomConfig);
-
-        $url = $file . '?' . http_build_query(['config' => $config . ',' . $userConfig], NULL, '&');
+        $url = $file . '?' . http_build_query(['config' => $config], NULL, '&');
         $out->addScript(Html::linkedScript($url));
+
+        self::$jsInserted = true;
 
         return true;
     }
