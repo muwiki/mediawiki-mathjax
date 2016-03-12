@@ -135,7 +135,7 @@ class MathJax_Parser
      */
     public static function preProcessLinks($content, Parser $parser, PPFrame $frame)
     {
-        return NStrings::replace($content, '~(?:(?<!\\\\)|^)\\\\(eq)?wikiref\\{(?P<link>[^\\}]+)\\}~', function (array $m) use ($parser) {
+        return NStrings::replace($content, '~(?:(?<!\\\\)|^)\\\\wikiref\\{(?P<link>[^\\}]+)\\}~', function (array $m) use ($parser) {
             $html = $parser->recursiveTagParseFully(sprintf('{{canonicalurl:%s}}', ltrim($m['link'], ':')));
             if (!$doc = self::createDomFromHtml($html)) {
                 return $m[0];
